@@ -27,7 +27,7 @@
 - [x] T009 Implement service-calendar date filtering logic from calendar/calendar_dates in app/logic/service_calendar.py
 - [x] T010 Implement feed validity-window parsing and startup-state evaluation in app/logic/feed_status.py
 - [x] T011 Implement shared request validators (date/time, distinct stops, required params) in app/logic/validators.py
-- [ ] T012 Implement privacy-preserving logging and error mapping middleware in app/__init__.py and app/logic/logging.py
+- [x] T012 Implement privacy-preserving logging and error mapping middleware in app/__init__.py and app/logic/logging.py
 - [ ] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/__init__.py
 - [ ] T014 Create accessible base template and shared styles in app/html/local/base.html and app/assets/local/css/app.css
 - [ ] T049 [P] Add unit tests for GTFS loader: source discovery (zip vs directory), required-field validation, and malformed-file rejection in tests/unit/test_gtfs_loader.py

@@ -41,9 +41,12 @@ def create_app(testing=None):
 
     from .logic.app_logic import AppLogic
     from .db_upgrader import DbUpgrader
+    from .logic.logging import register_error_handlers, register_request_logging
 
     my_app = init_ssk(my_app, AppLogic, DbUpgrader, testing)
     start_ssk(my_app, testing)
+    register_request_logging(my_app)
+    register_error_handlers(my_app)
     my_app.logger.info("create_app {} v. {} soseki ver {} end".format(my_app.config["USER_APP_NAME"],
                                                                        my_app.config["USER_APP_VERSION"],
                                                                        my_app.config["SSK_VER"]))
