@@ -11,11 +11,13 @@ import yaml
 from flask import Blueprint, Response, current_app, jsonify, request
 from ssk.blueprints.api_handler import ApiHandler
 
+from app.logic.feed_status import load_feed_status
 from app.logic.gtfs_loader import GtfsSchedule, GtfsSource, GtfsSourceError, load_gtfs_schedule
+from app.logic.departures_service import list_departures
 from app.logic.route_planner import plan_journeys
 from app.logic.service_calendar import ServiceCalendarError, load_service_calendar
-from app.logic.validators import RequestValidationError, validate_planner_request
-from app.models.entities import RouteLine, Stop, StopTime, Trip
+from app.logic.validators import RequestValidationError, validate_departures_request, validate_planner_request
+from app.models.entities import FeedStatusState, GtfsFeedWindow, RouteLine, Stop, StopTime, Trip
 
 bp = Blueprint('lapi', __name__)
 
@@ -65,6 +67,7 @@ def routes_plan():
         planner_request = validate_planner_request(payload)
         departure_datetime = datetime.combine(planner_request.travel_date, planner_request.departure_time)
         schedule, active_service_ids = _load_route_plan_schedule(planner_request.travel_date)
+        feed_status_context = _load_feed_status_context(planner_request.travel_date)
     except RequestValidationError as exc:
         return jsonify({'error': 'bad_request', 'message': str(exc)}), 400
     except ValueError:
@@ -82,12 +85,100 @@ def routes_plan():
     return jsonify(
         {
             'journeys': [journey.model_dump(mode='json') for journey in journeys],
-            'freshness_warning': None,
+            'freshness_warning': _build_freshness_warning_payload(feed_status_context.feed_status),
         }
     )
+
+
+@bp.get('/api/v1/departures')
+def departures():
+    try:
+        departures_request = validate_departures_request(
+            {
+                'stop_id': request.args.get('stop_id'),
+                'travel_date': request.args.get('travel_date') or request.args.get('date'),
+            }
+        )
+        schedule, active_service_ids = _load_route_plan_schedule(departures_request.travel_date)
+    except RequestValidationError as exc:
+        return jsonify({'error': 'bad_request', 'message': str(exc)}), 400
+    except (GtfsSourceError, ServiceCalendarError):
+        return jsonify({'error': 'service_unavailable'}), 503
+
+    items = list_departures(
+        schedule=schedule,
+        stop_id=departures_request.stop_id,
+        travel_date=departures_request.travel_date,
+        active_service_ids=active_service_ids,
+    )
+    return jsonify({'items': [item.model_dump(mode='json') for item in items]})
+
+
+@bp.get('/api/v1/feed/status')
+def feed_status():
+    reference_date_value = request.args.get('date') or request.args.get('travel_date')
+    reference_date = None
+    if reference_date_value:
+        try:
+            reference_date = datetime.strptime(reference_date_value, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': 'bad_request'}), 400
+
+    context = _load_feed_status_context(reference_date)
+    return jsonify(context.feed_status.model_dump(mode='json'))
+
+
 def _read_openapi_contract_text() -> str:
     contract_path = Path(current_app.config['JAKTRAFIC_OPENAPI_PATH'])
     return contract_path.read_text(encoding='utf-8')
+
+
+def _load_feed_status_context(reference_date: date | None):
+    source_path = current_app.config.get('GTFS_SOURCE_PATH')
+    archive_path = current_app.config.get('GTFS_SOURCE_ARCHIVE')
+
+    if _should_use_test_schedule(source_path, archive_path):
+        return _build_test_feed_status_context(reference_date)
+
+    return load_feed_status(source_path=source_path, archive_path=archive_path, reference_date=reference_date)
+
+
+def _build_test_feed_status_context(reference_date: date | None):
+    evaluated_date = reference_date or date.today()
+    return load_feed_status(
+        source=_build_test_schedule().source,
+        calendar_index=None,
+        reference_date=evaluated_date,
+    ) if False else _build_manual_test_feed_status_context(evaluated_date)
+
+
+def _build_manual_test_feed_status_context(reference_date: date):
+    from app.logic.feed_status import FeedStatusContext, evaluate_feed_status
+
+    feed_window = GtfsFeedWindow(
+        feed_start_date=date(2026, 3, 1),
+        feed_end_date=date(2026, 3, 31),
+        feed_publisher_name='Test Feed',
+        feed_version='test',
+    )
+    return FeedStatusContext(
+        feed_window=feed_window,
+        feed_status=evaluate_feed_status(
+            feed_window=feed_window,
+            reference_date=reference_date,
+            metadata_source='test_feed',
+        ),
+        metadata_source='test_feed',
+    )
+
+
+def _build_freshness_warning_payload(feed_status) -> dict[str, object] | None:
+    if feed_status.state is not FeedStatusState.WARNING:
+        return None
+    return {
+        'active': True,
+        'message': feed_status.message,
+    }
 
 
 def _load_route_plan_schedule(travel_date: date) -> tuple[GtfsSchedule, tuple[str, ...]]:

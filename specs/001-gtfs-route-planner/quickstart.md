@@ -81,11 +81,14 @@ Expected:
 pytest
 ```
 
+Contract, accessibility, and performance smoke checks are included in the default test run.
+
 Optional E2E browser checks:
 
 ```bash
-playwright install
+python -m playwright install chromium firefox webkit
 pytest tests/integration/test_web_planner_flow.py tests/integration/test_web_departures_flow.py
+pytest tests/integration/test_cross_browser.py
 ```
 
 ## 7) Manual sanity checks
@@ -95,3 +98,9 @@ pytest tests/integration/test_web_planner_flow.py tests/integration/test_web_dep
 3. Plan route for out-of-feed date and verify visible freshness warning.
 4. Open departures view for a stop/date and verify schedule list or no-service message.
 5. Navigate planner and departures pages using keyboard only.
+6. Query `/api/v1/openapi.json` and `/api/v1/feed/status` and verify JSON responses.
+
+## 8) CI
+
+Continuous integration is defined in `.github/workflows/ci.yml` and runs the full pytest suite on every push and pull request.
+

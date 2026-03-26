@@ -1,0 +1,67 @@
+{% extends "local/base.html" %}
+
+{% block title %}Departure Board | {{ super() }}{% endblock %}
+
+{% block body %}
+<main id="main-content" class="departures-page">
+  <section class="planner-panel" aria-labelledby="departures-title">
+    <h1 id="departures-title">Departure Board</h1>
+
+    {% if flash_messages %}
+      <section class="planner-messages" aria-label="Departure messages" aria-live="polite">
+        {% for category, message in flash_messages %}
+          <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <form method="GET" action="{{ url_for('departures.index') }}" aria-describedby="departures-help">
+      <fieldset>
+        <legend>Departure Search</legend>
+        <p id="departures-help">Enter a stop identifier and date to view the scheduled departure board.</p>
+
+        <div class="form-group">
+          <label for="stop_id">Stop</label>
+          <input type="text" id="stop_id" name="stop_id" value="{{ stop_id or '' }}" required aria-required="true" aria-invalid="{{ 'true' if field_errors.get('stop_id') else 'false' }}" {% if field_errors.get('stop_id') %}aria-describedby="stop_id_error"{% endif %} autocomplete="off">
+          {% if field_errors.get('stop_id') %}
+            <p id="stop_id_error" class="field-error">{{ field_errors.get('stop_id') }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="travel_date">Travel Date</label>
+          <input type="date" id="travel_date" name="travel_date" value="{{ travel_date or '' }}" required aria-required="true" aria-invalid="{{ 'true' if field_errors.get('travel_date') else 'false' }}" {% if field_errors.get('travel_date') %}aria-describedby="travel_date_error"{% endif %}>
+          {% if field_errors.get('travel_date') %}
+            <p id="travel_date_error" class="field-error">{{ field_errors.get('travel_date') }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Show Departures</button>
+      </fieldset>
+    </form>
+  </section>
+
+  {% if items is defined %}
+    {% if items %}
+      <section id="departure-results" class="planner-panel" aria-live="polite" aria-label="Departure results" tabindex="-1">
+        <h2>Scheduled Departures</h2>
+        <p>Found {{ items|length }} departure{% if items|length != 1 %}s{% endif %}.</p>
+        <ol>
+          {% for item in items %}
+            <li class="journey-card">
+              <strong>Line {{ item.route_id }}</strong>
+              toward {{ item.headsign or 'Scheduled service' }}
+              at {{ item.scheduled_departure.strftime('%H:%M') }}
+            </li>
+          {% endfor %}
+        </ol>
+      </section>
+    {% else %}
+      <section id="departure-results" class="planner-panel" aria-live="polite" aria-label="No departures found" tabindex="-1">
+        <h2>No Departures Available</h2>
+        <p>No departures are scheduled for stop {{ stop_id }} on {{ travel_date }}.</p>
+      </section>
+    {% endif %}
+  {% endif %}
+</main>
+{% endblock %}

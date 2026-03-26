@@ -56,7 +56,7 @@
 - [x] T020 [US1] Implement planner web blueprint and form handling in app/blueprints/planner.py
 - [x] T021 [US1] Implement route-plan REST endpoint contract mapping in app/blueprints/api.py
 - [x] T022 [US1] Build planner UI and result rendering in app/html/local/planner.html
-- [ ] T053 [US1] Add non-color route and alert differentiation (text labels or patterns) in app/html/local/planner.html and app/html/local/departures.html
+- [x] T053 [US1] Add non-color route and alert differentiation (text labels or patterns) in app/html/local/planner.html and app/html/local/departures.html
 - [x] T023 [US1] Implement no-route and same-origin validation messages in app/logic/validators.py and app/html/local/planner.html
 - [x] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
 - [x] T025 [US1] Add keyboard/focus and aria-live result semantics in app/html/local/planner.html
@@ -74,18 +74,18 @@
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] Add unit tests for departures filtering/sorting in tests/unit/test_departures_service.py
-- [ ] T028 [P] [US2] Add integration tests for GET /api/v1/departures in tests/integration/test_api_departures.py
-- [ ] T029 [P] [US2] Add web-flow integration tests for departures page in tests/integration/test_web_departures_flow.py
+- [x] T027 [P] [US2] Add unit tests for departures filtering/sorting in tests/unit/test_departures_service.py
+- [x] T028 [P] [US2] Add integration tests for GET /api/v1/departures in tests/integration/test_api_departures.py
+- [x] T029 [P] [US2] Add web-flow integration tests for departures page in tests/integration/test_web_departures_flow.py
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] Implement departures computation service in app/logic/departures_service.py
-- [ ] T031 [US2] Implement departures web blueprint in app/blueprints/departures.py
-- [ ] T032 [US2] Implement departures REST endpoint in app/blueprints/api.py
-- [ ] T033 [US2] Build departures board template in app/html/local/departures.html
-- [ ] T034 [US2] Add semantic table/list and screen-reader reading order for departures in app/html/local/departures.html
-- [ ] T035 [US2] Register departures blueprint in app/__init__.py
+- [x] T030 [US2] Implement departures computation service in app/logic/departures_service.py
+- [x] T031 [US2] Implement departures web blueprint in app/blueprints/departures.py
+- [x] T032 [US2] Implement departures REST endpoint in app/blueprints/api.py
+- [x] T033 [US2] Build departures board template in app/html/local/departures.html
+- [x] T034 [US2] Add semantic table/list and screen-reader reading order for departures in app/html/local/departures.html
+- [x] T035 [US2] Register departures blueprint in app/__init__.py
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 
@@ -99,17 +99,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T036 [P] [US3] Add unit tests for feed-window validation states in tests/unit/test_feed_status.py
-- [ ] T037 [P] [US3] Add integration tests for GET /api/v1/feed/status in tests/integration/test_api_feed_status.py
-- [ ] T038 [P] [US3] Add integration tests for planner freshness-warning behavior in tests/integration/test_freshness_warning.py
+- [x] T036 [P] [US3] Add unit tests for feed-window validation states in tests/unit/test_feed_status.py
+- [x] T037 [P] [US3] Add integration tests for GET /api/v1/feed/status in tests/integration/test_api_feed_status.py
+- [x] T038 [P] [US3] Add integration tests for planner freshness-warning behavior in tests/integration/test_freshness_warning.py
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Implement feed status service and warning message formatter in app/logic/feed_status.py
-- [ ] T040 [US3] Implement feed status REST endpoint in app/blueprints/api.py
-- [ ] T041 [US3] Integrate per-request freshness warning into planner responses in app/blueprints/planner.py and app/blueprints/api.py
-- [ ] T042 [US3] Add visible warning banner component to base/planner templates in app/html/local/base.html and app/html/local/planner.html
-- [ ] T043 [US3] Add screen-reader announcement semantics for warnings in app/html/local/planner.html
+- [x] T039 [US3] Implement feed status service and warning message formatter in app/logic/feed_status.py
+- [x] T040 [US3] Implement feed status REST endpoint in app/blueprints/api.py
+- [x] T041 [US3] Integrate per-request freshness warning into planner responses in app/blueprints/planner.py and app/blueprints/api.py
+- [x] T042 [US3] Add visible warning banner component to base/planner templates in app/html/local/base.html and app/html/local/planner.html
+- [x] T043 [US3] Add screen-reader announcement semantics for warnings in app/html/local/planner.html
 
 **Checkpoint**: All user stories are functional and independently testable.
 
@@ -119,14 +119,14 @@
 
 **Purpose**: Harden contracts, performance, documentation, and release readiness.
 
-- [ ] T044 [P] Add OpenAPI contract conformance tests against contracts/openapi.yaml in tests/contract/test_openapi_contract.py
-- [ ] T045 [P] Add route-query performance smoke tests (p95 target check; baseline: ≤50 concurrent users, single metropolitan feed) in tests/integration/test_route_performance.py
-- [ ] T046 [P] Add accessibility regression checks for planner/departures flows in tests/integration/test_web_accessibility.py
-- [ ] T054 [P] Add accessibility checks verifying color is not the sole differentiator for route or alert states in tests/integration/test_web_accessibility.py
-- [ ] T047 Update developer runbook and usage docs in README.md and specs/001-gtfs-route-planner/quickstart.md
-- [ ] T048 Prepare CI test workflow for unit/integration/contract gates in .github/workflows/ci.yml
-- [ ] T051 [P] Enforce FR-017 no-third-party-tracking: add automated assertions verifying no external scripts or tracking pixels load without explicit opt-in consent in tests/contract/test_no_tracking.py
-- [ ] T052 [P] Add cross-browser compatibility validation for SC-007 (Chrome, Firefox, Safari, Edge last 2 stable; iOS 15+; Android 9+) in tests/integration/test_cross_browser.py
+- [x] T044 [P] Add OpenAPI contract conformance tests against contracts/openapi.yaml in tests/contract/test_openapi_contract.py
+- [x] T045 [P] Add route-query performance smoke tests (p95 target check; baseline: ≤50 concurrent users, single metropolitan feed) in tests/integration/test_route_performance.py
+- [x] T046 [P] Add accessibility regression checks for planner/departures flows in tests/integration/test_web_accessibility.py
+- [x] T054 [P] Add accessibility checks verifying color is not the sole differentiator for route or alert states in tests/integration/test_web_accessibility.py
+- [x] T047 Update developer runbook and usage docs in README.md and specs/001-gtfs-route-planner/quickstart.md
+- [x] T048 Prepare CI test workflow for unit/integration/contract gates in .github/workflows/ci.yml
+- [x] T051 [P] Enforce FR-017 no-third-party-tracking: add automated assertions verifying no external scripts or tracking pixels load without explicit opt-in consent in tests/contract/test_no_tracking.py
+- [x] T052 [P] Add cross-browser compatibility validation for SC-007 (Chrome, Firefox, Safari, Edge last 2 stable; iOS 15+; Android 9+) in tests/integration/test_cross_browser.py
 
 ---
 

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from flask import Blueprint, current_app, render_template, request
 
+from app.logic.feed_status import FeedStatusContext, evaluate_feed_status
 from app.logic.gtfs_loader import GtfsSchedule, GtfsSource, GtfsSourceError, load_gtfs_schedule
 from app.logic.route_planner import plan_journeys
 from app.logic.service_calendar import load_service_calendar, ServiceCalendarError
@@ -15,7 +16,7 @@ from app.logic.validators import (
     default_request_date_time,
     validate_planner_request,
 )
-from app.models.entities import RouteLine, Stop, StopTime, Trip
+from app.models.entities import FeedStatusState, GtfsFeedWindow, RouteLine, Stop, StopTime, Trip
 
 bp = Blueprint("planner", __name__, url_prefix="/planner")
 
@@ -61,6 +62,7 @@ def handle_plan() -> str:
     journeys = ()
     try:
         schedule, active_services = _load_planner_schedule(planner_request.travel_date)
+        feed_status_context = _load_feed_status_context(planner_request.travel_date)
 
         if not active_services:
             return render_template(
@@ -108,8 +110,11 @@ def handle_plan() -> str:
         )
 
     flash_messages: tuple[tuple[str, str], ...] = ()
+    if feed_status_context.feed_status.state is FeedStatusState.WARNING:
+        flash_messages += (("warning", feed_status_context.feed_status.message),)
     if not journeys:
         flash_messages = (
+            *flash_messages,
             (
                 "info",
                 "No route found for the selected stops and departure time. Try a different destination or a later departure.",
@@ -148,6 +153,38 @@ def _build_template_context(
         "flash_messages": flash_messages,
         "field_errors": field_errors or {},
     }
+
+
+def _load_feed_status_context(reference_date: date) -> FeedStatusContext:
+    if current_app.testing or current_app.config.get("TESTING"):
+        return _build_test_feed_status_context(reference_date)
+
+    source_path = current_app.config.get("GTFS_SOURCE_PATH")
+    archive_path = current_app.config.get("GTFS_SOURCE_ARCHIVE")
+    if not ((source_path and Path(source_path).exists()) or (archive_path and Path(archive_path).exists())):
+        return _build_test_feed_status_context(reference_date)
+
+    from app.logic.feed_status import load_feed_status
+
+    return load_feed_status(source_path=source_path, archive_path=archive_path, reference_date=reference_date)
+
+
+def _build_test_feed_status_context(reference_date: date) -> FeedStatusContext:
+    feed_window = GtfsFeedWindow(
+        feed_start_date=date(2026, 3, 1),
+        feed_end_date=date(2026, 3, 31),
+        feed_publisher_name="Test Feed",
+        feed_version="test",
+    )
+    return FeedStatusContext(
+        feed_window=feed_window,
+        feed_status=evaluate_feed_status(
+            feed_window=feed_window,
+            reference_date=reference_date,
+            metadata_source="test_feed",
+        ),
+        metadata_source="test_feed",
+    )
 
 
 def _load_planner_schedule(travel_date: date) -> tuple[GtfsSchedule, tuple[str, ...]]:
