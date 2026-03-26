@@ -52,7 +52,7 @@
 ### Implementation for User Story 1
 
 - [ ] T018 [P] [US1] Implement stop-name search/disambiguation service in app/logic/stop_search.py
-- [ ] T019 [US1] Implement route-planning engine using GTFS indexes in app/logic/route_planner.py
+- [x] T019 [US1] Implement route-planning engine using GTFS indexes in app/logic/route_planner.py
 - [ ] T020 [US1] Implement planner web blueprint and form handling in app/blueprints/planner.py
 - [ ] T021 [US1] Implement route-plan REST endpoint contract mapping in app/blueprints/api.py
 - [ ] T022 [US1] Build planner UI and result rendering in app/html/local/planner.html
