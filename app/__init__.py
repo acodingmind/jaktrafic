@@ -54,4 +54,14 @@ def create_app(testing=None):
     from app.blueprints import api
     my_app.register_blueprint(api.bp)
 
+    # Feature blueprints are registered as stubs first and expanded in later tasks.
+    from app.blueprints import api_v1
+    my_app.register_blueprint(api_v1.bp)
+
+    from app.blueprints import planner
+    my_app.register_blueprint(planner.bp)
+
+    from app.blueprints import departures
+    my_app.register_blueprint(departures.bp)
+
     return my_app

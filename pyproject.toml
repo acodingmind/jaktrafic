@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jaktrafic"
+version = "0.1.0"
+description = "Static GTFS route planner web application built on soseki"
+readme = "app/README"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "codingminds.io" }
+]
+dependencies = [
+  "soseki",
+  "pydantic",
+  "python-dateutil"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "playwright"
+]
+
+dev = [
+  "pytest",
+  "playwright"
+]
+

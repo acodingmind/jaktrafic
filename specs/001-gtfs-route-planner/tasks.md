@@ -8,10 +8,10 @@
 **Purpose**: Initialize Python + soseki template-app foundation and baseline tooling.
 
 - [x] T001 Create soseki Blanco app directory skeleton via `python3 -m ssk.cli init`, including app/__init__.py, app/blueprints/, app/logic/cmd/, app/logic/jobs/, app/models/, app/html/local/, app/assets/local/, app/cfg/lite.yaml, app/requirements.txt, bin/run_app.sh, and jup/
-- [ ] T002 Create Python project metadata and dependencies in pyproject.toml
-- [ ] T003 [P] Add environment and runtime configuration scaffolding in app/cfg/lite.yaml and .env.example
-- [ ] T004 [P] Add initial app bootstrap and blueprint registration stubs in app/__init__.py and app/blueprints/
-- [ ] T005 [P] Configure test runners and baseline test packages in tests/unit/, tests/integration/, tests/contract/, and pytest.ini
+- [x] T002 Create Python project metadata and dependencies in pyproject.toml
+- [x] T003 [P] Add environment and runtime configuration scaffolding in app/cfg/lite.yaml and .env.example
+- [x] T004 [P] Add initial app bootstrap and blueprint registration stubs in app/__init__.py and app/blueprints/
+- [x] T005 [P] Configure test runners and baseline test packages in tests/unit/, tests/integration/, tests/contract/, and pytest.ini
 
 ---
 

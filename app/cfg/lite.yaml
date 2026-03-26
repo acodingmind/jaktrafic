@@ -60,6 +60,18 @@ ssk:
   DATA_FOLDER:
     string: "data"
 
+  # Runtime scaffolding for local and container execution
+  RUNTIME_HOST:
+    string: "0.0.0.0"
+  RUNTIME_PORT:
+    int: 5000
+  API_BASE_PATH:
+    string: "/api/v1"
+  GTFS_SOURCE_PATH:
+    string: "data"
+  GTFS_SOURCE_ARCHIVE:
+    string: "data/gtfs.zip"
+
   ROOT_URL:
     string: "https://codingminds.io"
 
