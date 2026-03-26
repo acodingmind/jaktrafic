@@ -51,11 +51,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Implement stop-name search/disambiguation service in app/logic/stop_search.py
+- [x] T018 [P] [US1] Implement stop-name search/disambiguation service in app/logic/stop_search.py
 - [x] T019 [US1] Implement route-planning engine using GTFS indexes in app/logic/route_planner.py
-- [ ] T020 [US1] Implement planner web blueprint and form handling in app/blueprints/planner.py
-- [ ] T021 [US1] Implement route-plan REST endpoint contract mapping in app/blueprints/api.py
-- [ ] T022 [US1] Build planner UI and result rendering in app/html/local/planner.html
+- [x] T020 [US1] Implement planner web blueprint and form handling in app/blueprints/planner.py
+- [x] T021 [US1] Implement route-plan REST endpoint contract mapping in app/blueprints/api.py
+- [x] T022 [US1] Build planner UI and result rendering in app/html/local/planner.html
 - [ ] T053 [US1] Add non-color route and alert differentiation (text labels or patterns) in app/html/local/planner.html and app/html/local/departures.html
 - [ ] T023 [US1] Implement no-route and same-origin validation messages in app/logic/validators.py and app/html/local/planner.html
 - [ ] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
