@@ -21,7 +21,7 @@
 
 **⚠️ CRITICAL**: No user story work should begin before this phase is complete.
 
-- [ ] T006 Implement GTFS source discovery (directory and zip support) in app/logic/gtfs_loader.py
+- [x] T006 Implement GTFS source discovery (directory and zip support) in app/logic/gtfs_loader.py
 - [ ] T007 [P] Define core domain entities and typed DTOs in app/models/entities.py
 - [ ] T008 Implement GTFS parser and in-memory indexes for stops/routes/trips/stop_times in app/logic/gtfs_loader.py
 - [ ] T009 Implement service-calendar date filtering logic from calendar/calendar_dates in app/logic/service_calendar.py
