@@ -1,0 +1,3 @@
+The content of this folder will be copied over templates/local and will be available in the blueprints under
+
+render_template("local/start.html") for instance

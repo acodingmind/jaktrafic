@@ -7,10 +7,10 @@
 
 **Purpose**: Initialize Python + soseki template-app foundation and baseline tooling.
 
-- [ ] T001 Create soseki Blanco app directory skeleton in app/__init__.py, app/main.py, app/blueprints/, app/logic/, app/models/, app/html/local/, app/assets/local/css/, and app/cfg/lite.yaml
+- [x] T001 Create soseki Blanco app directory skeleton via `python3 -m ssk.cli init`, including app/__init__.py, app/blueprints/, app/logic/cmd/, app/logic/jobs/, app/models/, app/html/local/, app/assets/local/, app/cfg/lite.yaml, app/requirements.txt, bin/run_app.sh, and jup/
 - [ ] T002 Create Python project metadata and dependencies in pyproject.toml
 - [ ] T003 [P] Add environment and runtime configuration scaffolding in app/cfg/lite.yaml and .env.example
-- [ ] T004 [P] Add initial app bootstrap and blueprint registration stubs in app/main.py and app/blueprints/
+- [ ] T004 [P] Add initial app bootstrap and blueprint registration stubs in app/__init__.py and app/blueprints/
 - [ ] T005 [P] Configure test runners and baseline test packages in tests/unit/, tests/integration/, tests/contract/, and pytest.ini
 
 ---
@@ -27,8 +27,8 @@
 - [ ] T009 Implement service-calendar date filtering logic from calendar/calendar_dates in app/logic/service_calendar.py
 - [ ] T010 Implement feed validity-window parsing and startup-state evaluation in app/logic/feed_status.py
 - [ ] T011 Implement shared request validators (date/time, distinct stops, required params) in app/logic/validators.py
-- [ ] T012 Implement privacy-preserving logging and error mapping middleware in app/main.py and app/logic/logging.py
-- [ ] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/main.py
+- [ ] T012 Implement privacy-preserving logging and error mapping middleware in app/__init__.py and app/logic/logging.py
+- [ ] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/__init__.py
 - [ ] T014 Create accessible base template and shared styles in app/html/local/base.html and app/assets/local/css/app.css
 - [ ] T049 [P] Add unit tests for GTFS loader: source discovery (zip vs directory), required-field validation, and malformed-file rejection in tests/unit/test_gtfs_loader.py
 - [ ] T050 [P] Add integration tests for GTFS feed ingestion boundary behavior: malformed rows, missing required fields, calendar edge cases, and zip/directory switching in tests/integration/test_gtfs_ingestion.py
@@ -60,7 +60,7 @@
 - [ ] T023 [US1] Implement no-route and same-origin validation messages in app/logic/validators.py and app/html/local/planner.html
 - [ ] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
 - [ ] T025 [US1] Add keyboard/focus and aria-live result semantics in app/html/local/planner.html
-- [ ] T026 [US1] Register planner blueprint in app/main.py
+- [ ] T026 [US1] Register planner blueprint in app/__init__.py
 
 **Checkpoint**: User Story 1 is fully functional and independently testable.
 
@@ -85,7 +85,7 @@
 - [ ] T032 [US2] Implement departures REST endpoint in app/blueprints/api.py
 - [ ] T033 [US2] Build departures board template in app/html/local/departures.html
 - [ ] T034 [US2] Add semantic table/list and screen-reader reading order for departures in app/html/local/departures.html
-- [ ] T035 [US2] Register departures blueprint in app/main.py
+- [ ] T035 [US2] Register departures blueprint in app/__init__.py
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 

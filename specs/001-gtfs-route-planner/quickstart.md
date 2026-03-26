@@ -7,8 +7,8 @@
 ## 1) Create and activate virtual environment
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 pip install --upgrade pip
 ```
 
@@ -20,22 +20,42 @@ pip install soseki pydantic python-dateutil pytest playwright
 
 ## 3) Initialize app from soseki template structure
 
+```bash
+python3 -m ssk.cli init
+```
+
 Use the soseki template-app layout and keep this structure:
 
 ```text
 app/
-  main.py
+  __init__.py
+  README
+  db_upgrader.py
+  requirements.txt
   blueprints/
+    home.py
+    api.py
   logic/
+    app_logic.py
+    cmd/
+    jobs/
   models/
+    DONOTREMOVE
   cfg/
     lite.yaml
+    tst.yaml
   html/
     local/
+      layout.html
+      start.html
+      about.html
   assets/
     local/
-  templates -> html/local
-  static -> assets/local
+
+bin/
+  run_app.sh
+
+jup/
 ```
 
 ## 4) Validate GTFS data startup assumptions
@@ -47,7 +67,7 @@ app/
 ## 5) Run the application
 
 ```bash
-python -m app.main
+./bin/run_app.sh
 ```
 
 Expected:

@@ -1,0 +1,70 @@
+{% block extra_head %}
+{% endblock %}
+
+{% extends 'local/layout.html' %}
+
+{% block main %}
+    {% from "flask_user/_macros.html" import render_field, render_submit_field %}
+    <div class="row">
+        <div class="col-md-8">
+        <div>
+            <div class="mb-2">
+                <h6>About Us</h6>
+            </div>
+            <div>
+                This is a basic soseki based web application.
+            </div>
+        </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Contact Us</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('local.post_contact') }}" method="post">
+                    <div>
+                        <input type="hidden" name="source" value='{{ form.source }}' >
+                        {% if message is not none %}
+                            <div id="run_message" class="col-12 alert alert-success" role="alert">
+                                <small>{{ message }}</small>
+                            </div>
+                        {% endif %}
+                        {% set field = form.name %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            {% if field.errors %}
+                                {% for e in field.errors %}
+                                    <p class="text-c-red">{{ e }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        {{ render_field(field, tabindex=110) }}
+                        <!-- email forms -->
+                        {% set field = form.email %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                        {% if field.errors %}
+                            {% for e in field.errors %}
+                                <p class="text-c-red">{{ e }}</p>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                        {{ render_field(field, tabindex=120) }}
+
+                        {% set field = form.message %}
+                        {{ render_field(field, tabindex=130) }}
+
+                        {{ render_submit_field(form.submit, tabindex=180) }}
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center">
+                <small class="text-muted">{{ meta.APP_NAME }} v {{ meta.APP_VERSION }} {{ meta.APP_PROFILE }} LG: {{ meta.LG_VERSION }} SSK: {{ meta.SSK_VERSION }} DB: {{ meta.DB_VERSION }} vs {{ meta.LATEST_DB_VERSION }}</small>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

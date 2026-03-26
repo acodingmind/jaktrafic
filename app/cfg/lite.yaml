@@ -1,0 +1,124 @@
+ssk:
+  PROFILE:
+    string: 'lite'
+  USER_APP_NAME:
+    string: 'jaktrafic'
+  USER_APP_VERSION:
+    string: '1.0.0'
+  SECRET_KEY:
+    string: "changeme-generate-random-secret-key"
+
+  WTF_CSRF_ENABLED:
+    bool: True
+
+  LOG_DIR:
+    string: "log"
+  LOG_FILE_NAME:
+    string: "web.log"
+  LOG_LEVEL:
+    string: "DEBUG"
+  LOG_ALL_REQUESTS:
+    bool: True
+  LOG_SLOWER_THAN:
+    int: 50
+
+  DB_HOST:
+    string: "localhost"
+  SQLALCHEMY_TRACK_MODIFICATIONS:
+    bool: False
+  SQLALCHEMY_DATABASE_URI:
+    string: 'sqlite:///jaktrafic_lite.sqlite'
+  LOG_DB_CONNSTR:
+    string: 'sqlite:///jaktrafic_lite_log.sqlite'
+  DB_MODEL_VERSION:
+    int: 1
+  COPYRIGHT_YEAR:
+    string: "2023"
+  COPYRIGHT:
+    string: "Coding Minds"
+
+  MAX_COLLECTORS:
+    int: 3
+
+  DB_CLEANUP:
+    json: {"job": 1,
+           "audit": 21,
+           "logdb.access": 21,
+           "logdb.status": 21,
+           "logdb.db_stats": 21, "logdb.stats": 21}
+  SCHED_ON:
+    bool: True
+  WEBSITE_OPEN:
+    bool: True
+  USER_ENABLE_FORGOT_PASSWORD:
+    bool: True
+  USER_ENABLE_REGISTER:
+    bool: True
+  USER_REQUIRE_INVITATION:
+    bool: False
+
+  DATA_FOLDER:
+    string: "data"
+
+  ROOT_URL:
+    string: "https://codingminds.io"
+
+  MAIL_USERNAME:
+    string: 'your-smtp-username'
+  MAIL_PASSWORD:
+    string: 'your-smtp-password'
+  MAIL_USE_TLS:
+    bool: True
+
+  MAIL_USE_SSL:
+    bool: False
+
+  MAIL_PORT:
+    int: 587
+  MAIL_DEFAULT_SENDER:
+    string: '"Your Name" <your-email@example.com>'
+  USER_EMAIL_SENDER_EMAIL:
+    string: 'your-email@example.com'
+  MAIL_SERVER:
+    string: 'your-smtp-server.example.com'
+  MAIL_SUPPRESS_SEND:
+    bool: False
+
+
+  MAX_ACTIVE_KEYS:
+    int: 10
+  API_ACTIVE_NOW:
+    int: 60
+
+  ADMIN_NAME:
+    string: 'admin'
+  ADMIN_EMAIL:
+    string: 'admin@example.com'
+  ADMIN_PASS:
+    string: 'changeme-admin-password'
+
+  USER_FREE_NAME:
+    string: 'free_user'
+  USER_FREE_EMAIL:
+    string: 'free@example.com'
+  USER_FREE_PASS:
+    string: 'changeme-free-password'
+
+  USER_PRO_NAME:
+    string: 'pro_user'
+  USER_PRO_EMAIL:
+    string: 'pro@example.com'
+  USER_PRO_PASS:
+    string: 'changeme-pro-password'
+
+  FREE_SUB:
+    string: "Free"
+
+  PRO_SUB:
+    string: "Pro"
+
+  TIME_TRAVEL:
+    string: ''
+
+  FONTAWESOME_KIT_ID:
+    string: ''  # Leave empty to use Font Awesome Free CDN
