@@ -52,7 +52,7 @@ class StopTime(EntityModel):
     arrival_time: str
     departure_time: str
     stop_id: str = Field(min_length=1)
-    stop_sequence: int = Field(ge=1)
+    stop_sequence: int = Field(ge=0)
 
     @field_validator("arrival_time", "departure_time")
     @classmethod

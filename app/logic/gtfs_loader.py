@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import csv
 import io
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, TextIO
+from typing import Any, Iterator, TextIO
 from zipfile import BadZipFile, ZipFile
+
+from pydantic import BaseModel, ValidationError
+
+from app.models.entities import RouteLine, Stop, StopTime, Trip
 
 
 REQUIRED_GTFS_FILES = {
@@ -26,6 +31,33 @@ OPTIONAL_GTFS_FILES = frozenset({"agency.txt", "calendar.txt", "calendar_dates.t
 
 class GtfsSourceError(RuntimeError):
     pass
+
+
+@dataclass(frozen=True, slots=True)
+class GtfsSchedule:
+    source: GtfsSource
+    stops_by_id: dict[str, Stop]
+    routes_by_id: dict[str, RouteLine]
+    trips_by_id: dict[str, Trip]
+    trips_by_route_id: dict[str, tuple[Trip, ...]]
+    stop_times_by_trip_id: dict[str, tuple[StopTime, ...]]
+    stop_times_by_stop_id: dict[str, tuple[StopTime, ...]]
+
+    @property
+    def stop_count(self) -> int:
+        return len(self.stops_by_id)
+
+    @property
+    def route_count(self) -> int:
+        return len(self.routes_by_id)
+
+    @property
+    def trip_count(self) -> int:
+        return len(self.trips_by_id)
+
+    @property
+    def stop_time_count(self) -> int:
+        return sum(len(stop_times) for stop_times in self.stop_times_by_trip_id.values())
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,6 +134,65 @@ def discover_gtfs_source(
     checked = ", ".join(str(path) for path in candidate_paths)
     details = "; ".join(errors)
     raise GtfsSourceError(f"Unable to discover a valid GTFS source from: {checked}. {details}")
+
+
+def load_gtfs_schedule(
+    source_path: str | Path | None = None,
+    archive_path: str | Path | None = None,
+    *,
+    source: GtfsSource | None = None,
+) -> GtfsSchedule:
+    gtfs_source = source or discover_gtfs_source(source_path=source_path, archive_path=archive_path)
+
+    stops_by_id = _load_entities(gtfs_source, "stops.txt", Stop, unique_key="stop_id")
+    routes_by_id = _load_entities(gtfs_source, "routes.txt", RouteLine, unique_key="route_id")
+    trips_by_id = _load_entities(gtfs_source, "trips.txt", Trip, unique_key="trip_id")
+    stop_times = _load_stop_times(gtfs_source, trips_by_id=trips_by_id, stops_by_id=stops_by_id)
+
+    trips_by_route: dict[str, list[Trip]] = defaultdict(list)
+    for trip in trips_by_id.values():
+        if trip.route_id not in routes_by_id:
+            raise GtfsSourceError(
+                f"GTFS file 'trips.txt' references unknown route_id '{trip.route_id}' for trip '{trip.trip_id}'"
+            )
+        trips_by_route[trip.route_id].append(trip)
+
+    stop_times_by_trip: dict[str, list[StopTime]] = defaultdict(list)
+    stop_times_by_stop: dict[str, list[StopTime]] = defaultdict(list)
+    for stop_time in stop_times:
+        stop_times_by_trip[stop_time.trip_id].append(stop_time)
+        stop_times_by_stop[stop_time.stop_id].append(stop_time)
+
+    sorted_stop_times_by_trip = {
+        trip_id: tuple(sorted(times, key=lambda item: item.stop_sequence))
+        for trip_id, times in stop_times_by_trip.items()
+    }
+    _validate_trip_stop_sequences(sorted_stop_times_by_trip)
+
+    sorted_stop_times_by_stop = {
+        stop_id: tuple(
+            sorted(
+                times,
+                key=lambda item: (_gtfs_time_sort_key(item.departure_time), item.trip_id, item.stop_sequence),
+            )
+        )
+        for stop_id, times in stop_times_by_stop.items()
+    }
+
+    sorted_trips_by_route = {
+        route_id: tuple(sorted(trips, key=lambda item: item.trip_id))
+        for route_id, trips in trips_by_route.items()
+    }
+
+    return GtfsSchedule(
+        source=gtfs_source,
+        stops_by_id=stops_by_id,
+        routes_by_id=routes_by_id,
+        trips_by_id=trips_by_id,
+        trips_by_route_id=sorted_trips_by_route,
+        stop_times_by_trip_id=sorted_stop_times_by_trip,
+        stop_times_by_stop_id=sorted_stop_times_by_stop,
+    )
 
 
 def _build_candidate_paths(
@@ -210,3 +301,114 @@ def _validate_required_files(source_path: Path, file_map: dict[str, str]) -> Non
     if missing_files:
         missing = ", ".join(missing_files)
         raise GtfsSourceError(f"GTFS source '{source_path}' is missing required files: {missing}")
+
+
+def _load_entities(
+    source: GtfsSource,
+    file_name: str,
+    model_type: type[BaseModel],
+    *,
+    unique_key: str,
+) -> dict[str, Any]:
+    entities: dict[str, Any] = {}
+    for row_number, row in _read_rows(source, file_name):
+        entity = _build_model(file_name, row_number, row, model_type)
+        entity_key = getattr(entity, unique_key)
+        if entity_key in entities:
+            raise GtfsSourceError(
+                f"GTFS file '{file_name}' contains duplicate {unique_key} '{entity_key}' on row {row_number}"
+            )
+        entities[entity_key] = entity
+
+    if not entities:
+        raise GtfsSourceError(f"GTFS file '{file_name}' contains no data rows")
+
+    return entities
+
+
+def _load_stop_times(
+    source: GtfsSource,
+    *,
+    trips_by_id: dict[str, Trip],
+    stops_by_id: dict[str, Stop],
+) -> list[StopTime]:
+    stop_times: list[StopTime] = []
+    for row_number, row in _read_rows(source, "stop_times.txt"):
+        stop_time = _build_model("stop_times.txt", row_number, row, StopTime)
+        if stop_time.trip_id not in trips_by_id:
+            raise GtfsSourceError(
+                f"GTFS file 'stop_times.txt' references unknown trip_id '{stop_time.trip_id}' on row {row_number}"
+            )
+        if stop_time.stop_id not in stops_by_id:
+            raise GtfsSourceError(
+                f"GTFS file 'stop_times.txt' references unknown stop_id '{stop_time.stop_id}' on row {row_number}"
+            )
+        stop_times.append(stop_time)
+
+    if not stop_times:
+        raise GtfsSourceError("GTFS file 'stop_times.txt' contains no data rows")
+
+    return stop_times
+
+
+def _read_rows(source: GtfsSource, file_name: str) -> Iterator[tuple[int, dict[str, str]]]:
+    with source.open_text(file_name) as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise GtfsSourceError(f"GTFS file '{file_name}' is missing a header row")
+
+        for row_number, raw_row in enumerate(reader, start=2):
+            if raw_row is None:
+                continue
+
+            if None in raw_row:
+                raise GtfsSourceError(
+                    f"GTFS file '{file_name}' has malformed row {row_number}: column count does not match the header"
+                )
+
+            normalized_row = {key: (value or "").strip() for key, value in raw_row.items()}
+            if not any(normalized_row.values()):
+                continue
+
+            yield row_number, normalized_row
+
+
+def _build_model(file_name: str, row_number: int, row: dict[str, str], model_type: type[BaseModel]) -> Any:
+    payload: dict[str, Any] = {}
+    for field_name in model_type.model_fields:
+        if field_name not in row:
+            continue
+
+        value = row[field_name]
+        if value == "" and _field_allows_none(model_type, field_name):
+            payload[field_name] = None
+        else:
+            payload[field_name] = value
+
+    try:
+        return model_type.model_validate(payload)
+    except ValidationError as exc:
+        raise GtfsSourceError(
+            f"GTFS file '{file_name}' contains invalid data on row {row_number}: {exc}"
+        ) from exc
+
+
+def _field_allows_none(model_type: type[BaseModel], field_name: str) -> bool:
+    field_info = model_type.model_fields[field_name]
+    return not field_info.is_required()
+
+
+def _validate_trip_stop_sequences(stop_times_by_trip: dict[str, tuple[StopTime, ...]]) -> None:
+    for trip_id, stop_times in stop_times_by_trip.items():
+        previous_sequence = None
+        for stop_time in stop_times:
+            if previous_sequence is not None and stop_time.stop_sequence <= previous_sequence:
+                raise GtfsSourceError(
+                    f"GTFS file 'stop_times.txt' contains non-increasing stop_sequence for trip '{trip_id}'"
+                )
+            previous_sequence = stop_time.stop_sequence
+
+
+def _gtfs_time_sort_key(value: str) -> tuple[int, int, int]:
+    hours_text, minutes_text, seconds_text = value.split(":", maxsplit=2)
+    return int(hours_text), int(minutes_text), int(seconds_text)
