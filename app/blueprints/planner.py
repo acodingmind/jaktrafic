@@ -5,11 +5,16 @@ from __future__ import annotations
 from datetime import date, datetime
 from pathlib import Path
 
-from flask import Blueprint, render_template, request, current_app
+from flask import Blueprint, current_app, render_template, request
 
 from app.logic.gtfs_loader import GtfsSchedule, GtfsSource, GtfsSourceError, load_gtfs_schedule
 from app.logic.route_planner import plan_journeys
 from app.logic.service_calendar import load_service_calendar, ServiceCalendarError
+from app.logic.validators import (
+    RequestValidationError,
+    default_request_date_time,
+    validate_planner_request,
+)
 from app.models.entities import RouteLine, Stop, StopTime, Trip
 
 bp = Blueprint("planner", __name__, url_prefix="/planner")
@@ -18,13 +23,13 @@ bp = Blueprint("planner", __name__, url_prefix="/planner")
 @bp.get("/")
 def index():
     """Render the planner form."""
-    return render_template(
-        "local/planner.html",
-        origin_stop_id=None,
-        destination_stop_id=None,
-        travel_date=None,
-        departure_time=None,
-    )
+    travel_date, departure_time = default_request_date_time()
+    return render_template("local/planner.html", **_build_template_context(
+        origin_stop_id="",
+        destination_stop_id="",
+        travel_date=travel_date.isoformat(),
+        departure_time=departure_time.strftime("%H:%M:%S"),
+    ))
 
 
 @bp.post("/")
@@ -35,103 +40,114 @@ def handle_plan() -> str:
     travel_date_str = request.form.get("travel_date", "").strip()
     departure_time_str = request.form.get("departure_time", "").strip()
 
-    # Validate inputs
-    errors = []
-    if not origin_stop_id:
-        errors.append("Origin stop ID is required")
-    if not destination_stop_id:
-        errors.append("Destination stop ID is required")
-    if not travel_date_str:
-        errors.append("Travel date is required")
-    if not departure_time_str:
-        errors.append("Departure time is required")
-
-    if errors:
-        return render_template(
-            "local/planner.html",
-            origin_stop_id=origin_stop_id,
-            destination_stop_id=destination_stop_id,
-            travel_date=travel_date_str,
-            departure_time=departure_time_str,
-            flash_messages=[("danger", err) for err in errors],
-        )
-
-    # Validate date/time format
     try:
-        travel_date = datetime.strptime(travel_date_str, "%Y-%m-%d").date()
-        departure_time = _parse_departure_time(departure_time_str)
-        departure_datetime = datetime.combine(travel_date, departure_time)
-    except ValueError as e:
+        planner_request = validate_planner_request(request.form)
+        departure_datetime = datetime.combine(planner_request.travel_date, planner_request.departure_time)
+    except RequestValidationError as exc:
+        default_date, default_time = default_request_date_time()
         return render_template(
             "local/planner.html",
-            origin_stop_id=origin_stop_id,
-            destination_stop_id=destination_stop_id,
-            travel_date=travel_date_str,
-            departure_time=departure_time_str,
-            flash_messages=[("danger", f"Invalid date/time format: {e}")],
+            **_build_template_context(
+                origin_stop_id=origin_stop_id,
+                destination_stop_id=destination_stop_id,
+                travel_date=travel_date_str or default_date.isoformat(),
+                departure_time=departure_time_str or default_time.strftime("%H:%M:%S"),
+                flash_messages=(("danger", str(exc)),),
+                field_errors={exc.field_name: str(exc)} if exc.field_name else {},
+            ),
         )
 
     # Plan journeys
     journeys = ()
     try:
-        schedule, active_services = _load_planner_schedule(travel_date)
+        schedule, active_services = _load_planner_schedule(planner_request.travel_date)
 
         if not active_services:
             return render_template(
                 "local/planner.html",
-                origin_stop_id=origin_stop_id,
-                destination_stop_id=destination_stop_id,
-                travel_date=travel_date_str,
-                departure_time=departure_time_str,
-                journeys=(),
-                flash_messages=[("danger", "No transit service available on this date")],
+                **_build_template_context(
+                    origin_stop_id=planner_request.origin_stop_id,
+                    destination_stop_id=planner_request.destination_stop_id,
+                    travel_date=planner_request.travel_date.isoformat(),
+                    departure_time=planner_request.departure_time.strftime("%H:%M:%S"),
+                    journeys=(),
+                    flash_messages=(("danger", "No transit service available on this date."),),
+                ),
             )
 
         journeys = plan_journeys(
             schedule=schedule,
-            origin_stop_id=origin_stop_id,
-            destination_stop_id=destination_stop_id,
+            origin_stop_id=planner_request.origin_stop_id,
+            destination_stop_id=planner_request.destination_stop_id,
             departure_datetime=departure_datetime,
             active_service_ids=active_services,
         )
     except (GtfsSourceError, ServiceCalendarError) as e:
         return render_template(
             "local/planner.html",
-            origin_stop_id=origin_stop_id,
-            destination_stop_id=destination_stop_id,
-            travel_date=travel_date_str,
-            departure_time=departure_time_str,
-            journeys=(),
-            flash_messages=[("danger", f"GTFS data error: {e}")],
+            **_build_template_context(
+                origin_stop_id=planner_request.origin_stop_id,
+                destination_stop_id=planner_request.destination_stop_id,
+                travel_date=planner_request.travel_date.isoformat(),
+                departure_time=planner_request.departure_time.strftime("%H:%M:%S"),
+                journeys=(),
+                flash_messages=(("danger", f"GTFS data error: {e}"),),
+            ),
         )
     except Exception as e:
         return render_template(
             "local/planner.html",
-            origin_stop_id=origin_stop_id,
-            destination_stop_id=destination_stop_id,
-            travel_date=travel_date_str,
-            departure_time=departure_time_str,
-            journeys=(),
-            flash_messages=[("danger", f"Error planning route: {e}")],
+            **_build_template_context(
+                origin_stop_id=planner_request.origin_stop_id,
+                destination_stop_id=planner_request.destination_stop_id,
+                travel_date=planner_request.travel_date.isoformat(),
+                departure_time=planner_request.departure_time.strftime("%H:%M:%S"),
+                journeys=(),
+                flash_messages=(("danger", f"Error planning route: {e}"),),
+            ),
+        )
+
+    flash_messages: tuple[tuple[str, str], ...] = ()
+    if not journeys:
+        flash_messages = (
+            (
+                "info",
+                "No route found for the selected stops and departure time. Try a different destination or a later departure.",
+            ),
         )
 
     return render_template(
         "local/planner.html",
-        origin_stop_id=origin_stop_id,
-        destination_stop_id=destination_stop_id,
-        travel_date=travel_date_str,
-        departure_time=departure_time_str,
-        journeys=journeys,
+        **_build_template_context(
+            origin_stop_id=planner_request.origin_stop_id,
+            destination_stop_id=planner_request.destination_stop_id,
+            travel_date=planner_request.travel_date.isoformat(),
+            departure_time=planner_request.departure_time.strftime("%H:%M:%S"),
+            journeys=journeys,
+            flash_messages=flash_messages,
+        ),
     )
 
 
-def _parse_departure_time(raw_value: str):
-    for time_format in ("%H:%M:%S", "%H:%M"):
-        try:
-            return datetime.strptime(raw_value, time_format).time()
-        except ValueError:
-            continue
-    raise ValueError("time data does not match HH:MM or HH:MM:SS")
+def _build_template_context(
+    *,
+    origin_stop_id: str,
+    destination_stop_id: str,
+    travel_date: str,
+    departure_time: str,
+    journeys: tuple = (),
+    flash_messages: tuple[tuple[str, str], ...] = (),
+    field_errors: dict[str | None, str] | None = None,
+) -> dict[str, object]:
+    return {
+        "origin_stop_id": origin_stop_id,
+        "destination_stop_id": destination_stop_id,
+        "travel_date": travel_date,
+        "departure_time": departure_time,
+        "journeys": journeys,
+        "flash_messages": flash_messages,
+        "field_errors": field_errors or {},
+    }
 
 
 def _load_planner_schedule(travel_date: date) -> tuple[GtfsSchedule, tuple[str, ...]]:

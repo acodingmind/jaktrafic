@@ -57,10 +57,10 @@
 - [x] T021 [US1] Implement route-plan REST endpoint contract mapping in app/blueprints/api.py
 - [x] T022 [US1] Build planner UI and result rendering in app/html/local/planner.html
 - [ ] T053 [US1] Add non-color route and alert differentiation (text labels or patterns) in app/html/local/planner.html and app/html/local/departures.html
-- [ ] T023 [US1] Implement no-route and same-origin validation messages in app/logic/validators.py and app/html/local/planner.html
-- [ ] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
-- [ ] T025 [US1] Add keyboard/focus and aria-live result semantics in app/html/local/planner.html
-- [ ] T026 [US1] Register planner blueprint in app/__init__.py
+- [x] T023 [US1] Implement no-route and same-origin validation messages in app/logic/validators.py and app/html/local/planner.html
+- [x] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
+- [x] T025 [US1] Add keyboard/focus and aria-live result semantics in app/html/local/planner.html
+- [x] T026 [US1] Register planner blueprint in app/__init__.py
 
 **Checkpoint**: User Story 1 is fully functional and independently testable.
 

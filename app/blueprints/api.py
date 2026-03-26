@@ -14,6 +14,7 @@ from ssk.blueprints.api_handler import ApiHandler
 from app.logic.gtfs_loader import GtfsSchedule, GtfsSource, GtfsSourceError, load_gtfs_schedule
 from app.logic.route_planner import plan_journeys
 from app.logic.service_calendar import ServiceCalendarError, load_service_calendar
+from app.logic.validators import RequestValidationError, validate_planner_request
 from app.models.entities import RouteLine, Stop, StopTime, Trip
 
 bp = Blueprint('lapi', __name__)
@@ -59,22 +60,13 @@ def openapi_json():
 @bp.post('/api/v1/routes/plan')
 def routes_plan():
     payload = request.get_json(silent=True) or {}
-    origin_stop_id = str(payload.get('origin_stop_id', '')).strip()
-    destination_stop_id = str(payload.get('destination_stop_id', '')).strip()
-    travel_date_str = str(payload.get('travel_date', '')).strip()
-    departure_time_str = str(payload.get('departure_time', '')).strip()
-
-    if not origin_stop_id or not destination_stop_id or not travel_date_str or not departure_time_str:
-        return jsonify({'error': 'bad_request'}), 400
-
-    if origin_stop_id == destination_stop_id:
-        return jsonify({'error': 'bad_request'}), 400
 
     try:
-        travel_date = datetime.strptime(travel_date_str, '%Y-%m-%d').date()
-        departure_time = _parse_departure_time(departure_time_str)
-        departure_datetime = datetime.combine(travel_date, departure_time)
-        schedule, active_service_ids = _load_route_plan_schedule(travel_date)
+        planner_request = validate_planner_request(payload)
+        departure_datetime = datetime.combine(planner_request.travel_date, planner_request.departure_time)
+        schedule, active_service_ids = _load_route_plan_schedule(planner_request.travel_date)
+    except RequestValidationError as exc:
+        return jsonify({'error': 'bad_request', 'message': str(exc)}), 400
     except ValueError:
         return jsonify({'error': 'bad_request'}), 400
     except (GtfsSourceError, ServiceCalendarError):
@@ -82,8 +74,8 @@ def routes_plan():
 
     journeys = plan_journeys(
         schedule=schedule,
-        origin_stop_id=origin_stop_id,
-        destination_stop_id=destination_stop_id,
+        origin_stop_id=planner_request.origin_stop_id,
+        destination_stop_id=planner_request.destination_stop_id,
         departure_datetime=departure_datetime,
         active_service_ids=active_service_ids,
     )
@@ -93,20 +85,9 @@ def routes_plan():
             'freshness_warning': None,
         }
     )
-
-
 def _read_openapi_contract_text() -> str:
     contract_path = Path(current_app.config['JAKTRAFIC_OPENAPI_PATH'])
     return contract_path.read_text(encoding='utf-8')
-
-
-def _parse_departure_time(raw_value: str):
-    for time_format in ('%H:%M:%S', '%H:%M'):
-        try:
-            return datetime.strptime(raw_value, time_format).time()
-        except ValueError:
-            continue
-    raise ValueError('invalid departure_time')
 
 
 def _load_route_plan_schedule(travel_date: date) -> tuple[GtfsSchedule, tuple[str, ...]]:

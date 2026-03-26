@@ -8,35 +8,48 @@
     <h1 id="planner-title">Plan Your Route</h1>
 
     {% if flash_messages %}
-      <section aria-label="Planner messages" aria-live="polite">
+      <section class="planner-messages" aria-label="Planner messages" aria-live="polite">
         {% for category, message in flash_messages %}
           <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
         {% endfor %}
       </section>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('planner.handle_plan') }}">
+    <form method="POST" action="{{ url_for('planner.handle_plan') }}" aria-describedby="planner-help">
       <fieldset>
         <legend>Journey Details</legend>
+        <p id="planner-help">Choose different origin and destination stops. Travel date and time default to the current moment.</p>
 
         <div class="form-group">
           <label for="origin_stop_id">From Stop</label>
-          <input type="text" id="origin_stop_id" name="origin_stop_id" value="{{ origin_stop_id or '' }}" required aria-required="true">
+          <input type="text" id="origin_stop_id" name="origin_stop_id" value="{{ origin_stop_id or '' }}" required aria-required="true" aria-invalid="{{ 'true' if field_errors.get('origin_stop_id') else 'false' }}" {% if field_errors.get('origin_stop_id') %}aria-describedby="origin_stop_id_error"{% endif %} autocomplete="off">
+          {% if field_errors.get('origin_stop_id') %}
+            <p id="origin_stop_id_error" class="field-error">{{ field_errors.get('origin_stop_id') }}</p>
+          {% endif %}
         </div>
 
         <div class="form-group">
           <label for="destination_stop_id">To Stop</label>
-          <input type="text" id="destination_stop_id" name="destination_stop_id" value="{{ destination_stop_id or '' }}" required aria-required="true">
+          <input type="text" id="destination_stop_id" name="destination_stop_id" value="{{ destination_stop_id or '' }}" required aria-required="true" aria-invalid="{{ 'true' if field_errors.get('destination_stop_id') else 'false' }}" {% if field_errors.get('destination_stop_id') %}aria-describedby="destination_stop_id_error"{% endif %} autocomplete="off">
+          {% if field_errors.get('destination_stop_id') %}
+            <p id="destination_stop_id_error" class="field-error">{{ field_errors.get('destination_stop_id') }}</p>
+          {% endif %}
         </div>
 
         <div class="form-group">
           <label for="travel_date">Travel Date</label>
-          <input type="date" id="travel_date" name="travel_date" value="{{ travel_date or '' }}" required aria-required="true">
+          <input type="date" id="travel_date" name="travel_date" value="{{ travel_date or '' }}" required aria-required="true" aria-invalid="{{ 'true' if field_errors.get('travel_date') else 'false' }}" {% if field_errors.get('travel_date') %}aria-describedby="travel_date_error"{% endif %}>
+          {% if field_errors.get('travel_date') %}
+            <p id="travel_date_error" class="field-error">{{ field_errors.get('travel_date') }}</p>
+          {% endif %}
         </div>
 
         <div class="form-group">
           <label for="departure_time">Departure Time</label>
-          <input type="time" id="departure_time" name="departure_time" value="{{ departure_time or '08:00:00' }}" required aria-required="true" step="1">
+          <input type="time" id="departure_time" name="departure_time" value="{{ departure_time or '08:00:00' }}" required aria-required="true" step="1" aria-invalid="{{ 'true' if field_errors.get('departure_time') else 'false' }}" {% if field_errors.get('departure_time') %}aria-describedby="departure_time_error"{% endif %}>
+          {% if field_errors.get('departure_time') %}
+            <p id="departure_time_error" class="field-error">{{ field_errors.get('departure_time') }}</p>
+          {% endif %}
         </div>
 
         <button type="submit" class="btn btn-primary">Search Routes</button>
@@ -46,7 +59,7 @@
 
   {% if journeys is defined %}
     {% if journeys %}
-      <section class="planner-panel" aria-live="polite" aria-label="Journey results">
+      <section id="planner-results" class="planner-panel" aria-live="polite" aria-label="Journey results" tabindex="-1">
         <h2>Available Routes</h2>
         <p>Found {{ journeys|length }} journey option(s).</p>
 
@@ -62,7 +75,7 @@
               <ol>
                 {% for leg in journey.legs %}
                   <li>
-                    Route {{ leg.route_id }} via {{ leg.trip_id }}
+                    Line {{ leg.route_id }} on trip {{ leg.trip_id }}
                     from {{ leg.board_stop_id }} at {{ leg.board_time.strftime('%H:%M') }}
                     to {{ leg.alight_stop_id }} at {{ leg.alight_time.strftime('%H:%M') }}
                   </li>
@@ -73,9 +86,10 @@
         {% endfor %}
       </section>
     {% else %}
-      <section class="planner-panel" aria-live="polite" aria-label="No route found">
+      <section id="planner-results" class="planner-panel" aria-live="polite" aria-label="No route found" tabindex="-1">
         <h2>No Route Available</h2>
         <p>No journey available from {{ origin_stop_id }} to {{ destination_stop_id }}.</p>
+        <p>Try a different stop pair or a later departure time.</p>
       </section>
     {% endif %}
   {% endif %}
