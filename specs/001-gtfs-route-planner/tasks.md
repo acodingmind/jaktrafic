@@ -28,7 +28,7 @@
 - [x] T010 Implement feed validity-window parsing and startup-state evaluation in app/logic/feed_status.py
 - [x] T011 Implement shared request validators (date/time, distinct stops, required params) in app/logic/validators.py
 - [x] T012 Implement privacy-preserving logging and error mapping middleware in app/__init__.py and app/logic/logging.py
-- [ ] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/__init__.py
+- [x] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/__init__.py
 - [ ] T014 Create accessible base template and shared styles in app/html/local/base.html and app/assets/local/css/app.css
 - [ ] T049 [P] Add unit tests for GTFS loader: source discovery (zip vs directory), required-field validation, and malformed-file rejection in tests/unit/test_gtfs_loader.py
 - [ ] T050 [P] Add integration tests for GTFS feed ingestion boundary behavior: malformed rows, missing required fields, calendar edge cases, and zip/directory switching in tests/integration/test_gtfs_ingestion.py

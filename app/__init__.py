@@ -38,6 +38,9 @@ def create_app(testing=None):
 
     my_instance_path = os.path.join(os.getcwd(), 'ins')
     my_app = Flask(__name__, instance_relative_config=True, instance_path=my_instance_path)
+    my_app.config['JAKTRAFIC_OPENAPI_PATH'] = str(
+        Path(os.getcwd()) / 'specs' / '001-gtfs-route-planner' / 'contracts' / 'openapi.yaml'
+    )
 
     from .logic.app_logic import AppLogic
     from .db_upgrader import DbUpgrader
