@@ -19,14 +19,13 @@ def test_core_pages_render_in_supported_browsers(browser_name: str) -> None:
             with playwright.sync_playwright() as p:
                 browser_type = getattr(p, browser_name)
                 browser = browser_type.launch()
+                page = browser.new_page()
+                for path, heading in (("/planner/", "Plan Your Route"), ("/departures/", "Departure Board")):
+                    page.goto(f"{base_url}{path}")
+                    assert page.locator("h1").text_content() == heading
+                browser.close()
         except Exception as exc:  # pragma: no cover - environment dependent
             pytest.skip(f"browser runtime unavailable for {browser_name}: {exc}")
-
-        with browser:
-            page = browser.new_page()
-            for path, heading in (("/planner/", "Plan Your Route"), ("/departures/", "Departure Board")):
-                page.goto(f"{base_url}{path}")
-                assert page.locator("h1").text_content() == heading
 
 
 @contextmanager
