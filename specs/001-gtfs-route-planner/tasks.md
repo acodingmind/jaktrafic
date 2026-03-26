@@ -46,7 +46,7 @@
 ### Tests for User Story 1
 
 - [x] T015 [P] [US1] Add unit tests for earliest-arrival routing and transfer logic in tests/unit/test_route_planner.py
-- [ ] T016 [P] [US1] Add integration tests for POST /api/v1/routes/plan in tests/integration/test_api_routes_plan.py
+- [x] T016 [P] [US1] Add integration tests for POST /api/v1/routes/plan in tests/integration/test_api_routes_plan.py
 - [ ] T017 [P] [US1] Add web-flow integration tests for planner form and result states in tests/integration/test_web_planner_flow.py
 
 ### Implementation for User Story 1
