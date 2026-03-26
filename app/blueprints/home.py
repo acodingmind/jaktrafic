@@ -10,8 +10,7 @@ from ssk.forms.contact_form import ContactForm
 from ssk.ssk_consts import SSK_ADMIN_GROUP
 from ssk.globals.web_gate import WebGate
 
-from flask import Blueprint, request
-from flask import render_template
+from flask import Blueprint, redirect, render_template, request, url_for
 
 bp = Blueprint('local', __name__, url_prefix='/')
 
@@ -21,7 +20,7 @@ def index():
     if WebGate.is_closed():
         return WebGate.render_closed()
 
-    return render_template("local/start.html", admin_group_name=SSK_ADMIN_GROUP)
+    return redirect(url_for("planner.index"))
 
 
 @bp.route('/about', methods=['GET'])

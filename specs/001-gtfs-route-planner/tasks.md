@@ -61,6 +61,7 @@
 - [x] T024 [US1] Implement default current date/time behavior in app/blueprints/planner.py and app/html/local/planner.html
 - [x] T025 [US1] Add keyboard/focus and aria-live result semantics in app/html/local/planner.html
 - [x] T026 [US1] Register planner blueprint in app/__init__.py
+- [x] T055 [US1] Make the planner the default landing page by updating the home route in app/blueprints/home.py and app/__init__.py
 
 **Checkpoint**: User Story 1 is fully functional and independently testable.
 

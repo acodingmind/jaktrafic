@@ -11,6 +11,13 @@ def client():
     return app.test_client()
 
 
+def test_home_page_redirects_to_planner(client) -> None:
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/planner/")
+
+
 def test_planner_page_renders_route_form(client) -> None:
     response = client.get("/planner/")
 
