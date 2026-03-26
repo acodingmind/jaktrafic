@@ -30,7 +30,7 @@
     <header class="header">
         <div class="header-left">
             <a href="/" class="header-logo">
-                <em class="fa-solid fa-cubes"></em> {{ user_manager.USER_APP_NAME }}
+                <em class="fa-solid fa-route"></em> {{ user_manager.USER_APP_NAME }}
             </a>
         </div>
         <div class="header-center">
@@ -40,13 +40,6 @@
                 <li>
                     <a href="{{ url_for('local.about') }}">{%trans%}About{%endtrans%}</a>
                 </li>
-                {% if user_manager.USER_ENABLE_REGISTER and not user_manager.USER_REQUIRE_INVITATION %}
-                    {% if not call_or_get(current_user.is_authenticated) %}
-                    <li>
-                        <a href="{{ url_for('user.register') }}">{%trans%}Register{%endtrans%}</a>
-                    </li>
-                    {% endif %}
-                {% endif %}
                 {% if call_or_get(current_user.is_authenticated) %}
                     <li>
                         <a href="{{ url_for('user.edit_user_profile') }}">
@@ -58,10 +51,6 @@
                             <em class="fas fa-arrow-right-from-bracket"></em> {%trans%}Sign out{%endtrans%}
                         </a>
                     </li>
-                {% else %}
-                    <li>
-                        <a href="{{ url_for('user.login') }}">{%trans%}Sign in{%endtrans%}</a>
-                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -70,12 +59,6 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li class="sidebar-menu-item">
-                <a href="{{ url_for('home.blog_posts') }}" class="sidebar-menu-link">
-                    <span class="sidebar-menu-icon"><em class="fa-solid fa-lightbulb"></em></span>
-                    <span>Thoughts</span>
-                </a>
-            </li>
             {% if call_or_get(current_user.is_authenticated) %}
                 {% if current_user.has_roles( admin_group_name ) %}
                     <li class="sidebar-section-title">Admin</li>
