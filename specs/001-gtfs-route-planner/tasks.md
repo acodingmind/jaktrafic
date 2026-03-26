@@ -31,7 +31,7 @@
 - [x] T013 Implement API blueprint scaffold and OpenAPI exposure wiring in app/blueprints/api.py and app/__init__.py
 - [x] T014 Create accessible base template and shared styles in app/html/local/base.html and app/assets/local/css/app.css
 - [x] T049 [P] Add unit tests for GTFS loader: source discovery (zip vs directory), required-field validation, and malformed-file rejection in tests/unit/test_gtfs_loader.py
-- [ ] T050 [P] Add integration tests for GTFS feed ingestion boundary behavior: malformed rows, missing required fields, calendar edge cases, and zip/directory switching in tests/integration/test_gtfs_ingestion.py
+- [x] T050 [P] Add integration tests for GTFS feed ingestion boundary behavior: malformed rows, missing required fields, calendar edge cases, and zip/directory switching in tests/integration/test_gtfs_ingestion.py
 
 **Checkpoint**: Foundation complete; user stories can be implemented.
 
@@ -45,7 +45,7 @@
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Add unit tests for earliest-arrival routing and transfer logic in tests/unit/test_route_planner.py
+- [x] T015 [P] [US1] Add unit tests for earliest-arrival routing and transfer logic in tests/unit/test_route_planner.py
 - [ ] T016 [P] [US1] Add integration tests for POST /api/v1/routes/plan in tests/integration/test_api_routes_plan.py
 - [ ] T017 [P] [US1] Add web-flow integration tests for planner form and result states in tests/integration/test_web_planner_flow.py
 
