@@ -1,0 +1,109 @@
+ssk:
+  PROFILE:
+    string: 'tst'
+  USER_APP_NAME:
+    string: 'jaktrafic'
+  USER_APP_VERSION:
+    string: '1.0.0'
+  SECRET_KEY:
+    string: "test-secret-key-not-for-production"
+
+  WTF_CSRF_ENABLED:
+    bool: False
+
+  LOG_DIR:
+    string: "log"
+  LOG_FILE_NAME:
+    string: "tst.log"
+  LOG_LEVEL:
+    string: "DEBUG"
+  LOG_ALL_REQUESTS:
+    bool: True
+  LOG_SLOWER_THAN:
+    int: 50
+
+  DB_HOST:
+    string: "localhost"
+  SQLALCHEMY_TRACK_MODIFICATIONS:
+    bool: False
+  SQLALCHEMY_DATABASE_URI:
+    string: 'sqlite:///jaktrafic_tst.sqlite'
+  LOG_DB_CONNSTR:
+    string: 'sqlite:///jaktrafic_tst_log.sqlite'
+  DB_MODEL_VERSION:
+    int: 1
+  COPYRIGHT_YEAR:
+    string: "2023"
+  COPYRIGHT:
+    string: "Coding Minds"
+  MAX_COLLECTORS:
+    int: 3
+
+  DB_CLEANUP:
+    json: {"job": 1, "audit": 7, "logdb.access": 7}
+  SCHED_ON:
+    bool: True
+  WEBSITE_OPEN:
+    bool: True
+  USER_ENABLE_FORGOT_PASSWORD:
+    bool: True
+  USER_ENABLE_REGISTER:
+    bool: False
+  USER_REQUIRE_INVITATION:
+    bool: False
+
+  DATA_FOLDER:
+    string: "data"
+
+  ROOT_URL:
+    string: "https://codingminds.io"
+
+  MAIL_USERNAME:
+    string: 'not_set'
+  MAIL_PASSWORD:
+    string: 'not_set'
+  MAIL_DEFAULT_SENDER:
+    string: 'not_set'
+  USER_EMAIL_SENDER_EMAIL:
+    string: 'noreply@test.local'
+  MAIL_SERVER:
+    string: 'not_set'
+  MAIL_SUPPRESS_SEND:
+    bool: True
+
+  MAX_ACTIVE_KEYS:
+    int: 10
+  API_ACTIVE_NOW:
+    int: 60
+
+  ADMIN_NAME:
+    string: 'test_admin'
+  ADMIN_EMAIL:
+    string: 'admin@test.local'
+  ADMIN_PASS:
+    string: 'test_password'
+
+  USER_FREE_NAME:
+    string: 'test_free'
+  USER_FREE_EMAIL:
+    string: 'free@test.local'
+  USER_FREE_PASS:
+    string: 'test_password'
+
+  USER_PRO_NAME:
+    string: 'test_pro'
+  USER_PRO_EMAIL:
+    string: 'pro@test.local'
+  USER_PRO_PASS:
+    string: 'test_password'
+
+  FREE_SUB:
+    string: "Free"
+  PRO_SUB:
+    string: "Pro"
+
+  TIME_TRAVEL:
+    string: ''
+
+  FONTAWESOME_KIT_ID:
+    string: ''  # Leave empty to use Font Awesome Free CDN

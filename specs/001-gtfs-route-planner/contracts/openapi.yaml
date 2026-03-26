@@ -1,0 +1,220 @@
+openapi: 3.1.0
+info:
+  title: JakTrafic API
+  version: 1.0.0
+  description: REST API for static GTFS route planning and departures.
+servers:
+  - url: /api/v1
+paths:
+  /stops/search:
+    get:
+      summary: Search stops by name
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Matching stops
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StopSearchResult'
+                required: [items]
+  /routes/plan:
+    post:
+      summary: Plan route between two stops
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutePlanRequest'
+      responses:
+        '200':
+          description: Planned routes and optional freshness warning
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePlanResponse'
+        '400':
+          description: Invalid input (for example same origin and destination)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /departures:
+    get:
+      summary: Get departures from a stop on a selected date
+      parameters:
+        - in: query
+          name: stop_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Departure list for stop/date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeparturesResponse'
+  /feed/status:
+    get:
+      summary: Report GTFS feed validity window status
+      responses:
+        '200':
+          description: Feed status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedStatus'
+components:
+  schemas:
+    StopSearchResult:
+      type: object
+      properties:
+        stop_id:
+          type: string
+        stop_name:
+          type: string
+      required: [stop_id, stop_name]
+
+    Leg:
+      type: object
+      properties:
+        route_id:
+          type: string
+        trip_id:
+          type: string
+        board_stop_id:
+          type: string
+        alight_stop_id:
+          type: string
+        board_time:
+          type: string
+          format: date-time
+        alight_time:
+          type: string
+          format: date-time
+        headsign:
+          type: string
+      required: [route_id, trip_id, board_stop_id, alight_stop_id, board_time, alight_time]
+
+    Journey:
+      type: object
+      properties:
+        departure_datetime:
+          type: string
+          format: date-time
+        arrival_datetime:
+          type: string
+          format: date-time
+        duration_minutes:
+          type: integer
+          minimum: 0
+        transfer_count:
+          type: integer
+          minimum: 0
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Leg'
+      required: [departure_datetime, arrival_datetime, duration_minutes, transfer_count, legs]
+
+    RoutePlanRequest:
+      type: object
+      properties:
+        origin_stop_id:
+          type: string
+        destination_stop_id:
+          type: string
+        travel_date:
+          type: string
+          format: date
+        departure_time:
+          type: string
+          pattern: '^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$'
+      required: [origin_stop_id, destination_stop_id, travel_date, departure_time]
+
+    RoutePlanResponse:
+      type: object
+      properties:
+        freshness_warning:
+          type: object
+          nullable: true
+          properties:
+            active:
+              type: boolean
+            message:
+              type: string
+          required: [active, message]
+        journeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Journey'
+      required: [journeys]
+
+    Departure:
+      type: object
+      properties:
+        stop_id:
+          type: string
+        trip_id:
+          type: string
+        route_id:
+          type: string
+        headsign:
+          type: string
+        scheduled_departure:
+          type: string
+          format: date-time
+      required: [stop_id, trip_id, route_id, scheduled_departure]
+
+    DeparturesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Departure'
+      required: [items]
+
+    FeedStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: [healthy, warning]
+        message:
+          type: string
+        feed_start_date:
+          type: string
+          format: date
+          nullable: true
+        feed_end_date:
+          type: string
+          format: date
+          nullable: true
+      required: [state, message]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
